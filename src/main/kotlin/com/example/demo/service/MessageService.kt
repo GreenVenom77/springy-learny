@@ -15,7 +15,17 @@ class MessageService(
     private val db: MessageRepository,
     private val messagesConfig: MessagesConfig
 ) {
-    fun findMessages(): List<MessageResponseDto> = db.findAll().map { it.toDto() }
+    fun findMessages(content: String?): List<MessageResponseDto> {
+        return if(content != null) {
+            db
+                .findByContentContainsIgnoreCase(content)
+                .map { it.toDto() }
+        } else {
+            db
+                .findAll()
+                .map { it.toDto() }
+        }
+    }
 
     fun findMessageById(id: UUID): MessageResponseDto = db.findByIdOrNull(id)?.toDto() ?: throw MessageNotFoundException(id)
 
