@@ -2,6 +2,7 @@ package com.example.demo
 
 import com.example.demo.service.MessageService
 import jakarta.validation.Valid
+import org.springframework.data.web.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -26,6 +27,13 @@ class MessageController(
     fun listMessages(
         @RequestParam("content", required = false) content: String?
     ): List<MessageResponseDto> = service.findMessages(content)
+
+    @GetMapping("paged")
+    fun listMessagesPaged(
+        @RequestParam("content", required = false) content: String?,
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("pageSize", defaultValue = "10") pageSize: Int,
+    ): PagedModel<MessageResponseDto> = service.findMessagesPaged(content, page, pageSize)
 
     @PostMapping
     fun postMessage(

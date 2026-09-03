@@ -6,7 +6,9 @@ import com.example.demo.UpdateMessageRequestDto
 import com.example.demo.config.MessagesConfig
 import com.example.demo.exception.MessageNotFoundException
 import com.example.demo.repository.MessageRepository
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.data.web.PagedModel
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -25,6 +27,21 @@ class MessageService(
                 .findAll()
                 .map { it.toDto() }
         }
+    }
+
+    fun findMessagesPaged(
+        content: String?,
+        page: Int,
+        size: Int,
+    ): PagedModel<MessageResponseDto> {
+        val pageable = PageRequest.of(page, size)
+        val messages = if (content != null) {
+            db.findByContentContainsIgnoreCase(content, pageable).map { it.toDto() }
+        } else {
+            db.findAllByOrderByCreatedAtDesc(pageable).map { it.toDto() }
+        }
+
+        return PagedModel(messages)
     }
 
     fun findMessageById(id: UUID): MessageResponseDto = db.findByIdOrNull(id)?.toDto() ?: throw MessageNotFoundException(id)
